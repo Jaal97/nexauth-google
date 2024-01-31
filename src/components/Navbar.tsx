@@ -3,12 +3,13 @@
 import Link from 'next/link'
 import React from 'react'
 import { signIn} from 'next-auth/react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut} from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 function Navbar() {
 
   const {data: session} = useSession()
-  console.log(session)
+  // const router = useRouter()
 
   return (
     <nav className='bg-slate-900 flex items-center py-3 justify-between px-24 text-white'>
@@ -18,14 +19,32 @@ function Navbar() {
           </h1>
         </Link>
         
-        <div className='flex gap-x-2 items-center'>
+        {session?.user ? (
+          <div className='flex gap-x-2 items-center'>
             <Link href="/dashboard">
               Dashboard
             </Link>
-            <button onClick={() =>signIn()} className='bg-sky-400 px-3 py-2 rounded'>
-              Sign In
+            <p>{session.user.name} {session.user.email}</p>
+            <img src={session.user.image} alt="" 
+              className='w-10 h-10 rounded-full cursor-pointer'
+            />
+            <button
+              onClick={ async() => {
+                await signOut({
+                  callbackUrl: "/"
+                })
+                // router.push('/')
+              }}
+            >
+              Logout
             </button>
-        </div>
+           
+          </div>
+        ): (
+          <button onClick={() =>signIn()} className='bg-sky-400 px-3 py-2 rounded'>
+          Sign In
+        </button>
+        )}
     </nav>
   )
 }
